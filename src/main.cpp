@@ -9,14 +9,16 @@
  */
 
 #include <pch.hpp>
-#include <GenPassword.hpp>
+#include <Recorder.hpp>
+#include <Data.hpp>
 
-int main(int argv, char *argc)
+// TODO: choose the filepath according to username
+const std::string DATA_PATH = "/DATA/test.json";
+
+int main(int argc, char *argv[])
 {
-    for (int i = 0; i < 10; i++)
-    {
-        auto password = TP::RandomPasswordGenerator::generate(20, true, true, true);
-        std::cout << password << std::endl;
-    }
+    std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::JsonPData>(std::string(PROJECT_PATH) + DATA_PATH);
+    
+    TP::interactiveCreate(std::cin, std::cout, std::move(data));
     return 0;
 }

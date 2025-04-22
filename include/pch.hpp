@@ -8,6 +8,8 @@
  *
  */
 
+#pragma once
+
 #include <vector>
 #include <array>
 #include <map>
@@ -19,8 +21,12 @@
 #include <random>
 #include <stdexcept>
 #include <algorithm>
+#include <sstream>
 
 #ifdef _WIN32
 #include <windows.h>
 #include <bcrypt.h>
+#include <conio.h>
 #endif
+
+#include <nlohmann/json.hpp>

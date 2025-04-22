@@ -6,14 +6,17 @@ project(TrillionPass VERSION 1.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/dependencies/include
+    )
 file(GLOB_RECURSE SRC "src/*.cpp")
 
 if (MSVC)
     add_compile_options("/utf-8")
 endif()
 
-add_executable(${PROJECT_NAME} WIN32 ${SRC})
+add_executable(${PROJECT_NAME} ${SRC})
 target_precompile_headers(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include/pch.hpp)
 
 if (MSVC)
