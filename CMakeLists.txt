@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.17)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(pass VERSION 1.0)
@@ -15,6 +15,8 @@ file(GLOB_RECURSE SRC "src/*.cpp")
 if (MSVC)
     add_compile_options("/utf-8")
 endif()
+
+set(CMAKE_BUILD_TYPE Debug)
 
 add_executable(${PROJECT_NAME} ${SRC})
 target_precompile_headers(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include/pch.hpp)

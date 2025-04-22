@@ -21,7 +21,7 @@
 #include <random>
 #include <stdexcept>
 #include <algorithm>
-#include <sstream>
+#include <iterator>
 
 #ifdef _WIN32
 #include <windows.h>

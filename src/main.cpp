@@ -8,18 +8,17 @@
  *
  */
 
-#include <pch.hpp>
 #include <Recorder.hpp>
 #include <Data.hpp>
 #include <Finder.hpp>
 
 // TODO: choose the filepath according to username
-const std::string DATA_PATH = "/DATA/test.json";
+const std::string DATA_PATH = "/DATA/KeyChain.json";
 
 // structure to store command line parameters
 struct CLParameters
 {
-    std::string command;    // should begin with '-'
+    std::string command;    // should begin with '-']
     std::vector<std::string> argument;
 };
 
@@ -78,6 +77,12 @@ int main(int argc, char* argv[])
         else if (parameters.command == "-v")    // version
         {
             std::cout << TPASS_VERSION << std::endl;
+        }
+        else if (parameters.command == "-l")    // list all keychain
+        {
+            std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::JsonPData>(std::string(PROJECT_PATH) + DATA_PATH);
+
+            TP::listAllKeyChains(std::cin, std::cout, std::move(data));
         }
         else
         {

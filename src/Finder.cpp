@@ -55,4 +55,20 @@ namespace TP
             out << "Password has been copied to the clipboard." << std::endl;
         }
     }
+
+    void listAllKeyChains(std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data)
+    {
+        out << "List All Keychains\n============================" << std::endl;
+        if (!login(in, out))
+            return;
+
+        for (size_t i = 0; i < data->size(); i++)
+        {
+            out << i + 1 << ":\n";
+            auto key = data->find(i);
+            out << "name: " << key.name << '\n';
+            out << "brief" << key.brief << '\n';
+            out << std::endl;
+        }
+    }
 }

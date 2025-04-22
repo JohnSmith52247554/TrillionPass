@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <pch.hpp>
 #include <Data.hpp>
 
 namespace TP

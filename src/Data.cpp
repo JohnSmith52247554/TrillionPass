@@ -14,6 +14,56 @@ namespace TP
 {
     namespace Data
     {
+        DataIterator &JsonDI::operator++()
+        {
+            ++it;
+            return *this;
+        }
+
+        DataIterator &JsonDI::operator--()
+        {
+            --it;
+            return *this;
+        }
+
+        DataIterator &JsonDI::operator+=(size_t n)
+        {
+            it += n;
+            return *this;
+        }
+
+        DataIterator &JsonDI::operator-=(size_t n)
+        {
+            it -= n;
+            return *this;
+        }
+
+        KeyChain &JsonDI::operator*() const
+        {
+            parseJsonElement();
+            return *key;
+        }
+
+        KeyChain *JsonDI::operator->() const
+        {
+            parseJsonElement();
+            return key.get();
+        }
+
+        bool JsonDI::operator==(const JsonDI &other) const
+        {
+            return it == other.it;
+        }
+
+        void JsonDI::parseJsonElement() const
+        {
+            key = std::make_unique<KeyChain>();
+            key->name = (*it)["name"];
+            key->brief = (*it)["brief"];
+            key->account_name = (*it)["account_name"];
+            key->encryted_password = (*it)["encryted_password"];
+        }
+
         JsonPData::JsonPData(const std::string filepath)
             : file_path(filepath)
         {
@@ -55,6 +105,22 @@ namespace TP
             }
             KeyChain blank_output;
             return blank_output;
+        }
+
+        TP::KeyChain JsonPData::find(const int offset)
+        {
+            if (offset < 0 || offset >= json.size())
+            {
+                KeyChain blank_output;
+                return blank_output;
+            }
+
+            KeyChain output = {
+                json[offset]["name"],
+                json[offset]["brief"],
+                json[offset]["account_name"],
+                json[offset]["encrypted_password"]};
+            return output;
         }
 
         const bool JsonPData::overwrite(int offset, KeyChain key)
@@ -111,6 +177,21 @@ namespace TP
                 throw std::runtime_error("cannot open keychain data file " + file_path);
             file << json.dump(4);
             file.close();
+        }
+
+        size_t JsonPData::size() const
+        {
+            return json.size();
+        }
+
+        JsonDI JsonPData::begin()
+        {
+            return JsonDI(json.begin());
+        }
+
+        JsonDI JsonPData::end()
+        {
+            return JsonDI(json.end());
         }
     }
 }
