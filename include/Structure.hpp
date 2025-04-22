@@ -22,7 +22,7 @@ namespace TP
     {
         std::string name;              // the name of the password ("Github" for example)
         std::string brief;             // a brief discription for the password
-        std::string username;          // the username for the account
+        std::string account_name;          // the account_name for the account
         std::string encryted_password; // the password after encrytion
     };
 } // namespace TP

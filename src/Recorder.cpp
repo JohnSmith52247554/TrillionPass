@@ -1,6 +1,6 @@
 /**
  * @file Recorder.cpp
- * @author username (username52247554@gmail.com)
+ * @author account_name (username52247554@gmail.com)
  * @brief record the generated password
  * @date 2025-04-22
  *
@@ -16,13 +16,10 @@ namespace
 {
     // TODO: encryt and save it in a file
     const std::string MASTER_PASSWORD = "password";
+}
 
-    // TODO: support other systems
-    /**
-     * @brief copy a string into the system clipboard
-     *
-     * @param text the string to be copied
-     */
+namespace TP
+{
     void copyToClipboard(const std::string &text)
     {
 #ifdef _WIN32
@@ -61,14 +58,6 @@ namespace
 #endif
     }
 
-    /**
-     * @brief ask the user to enter the MASTER PASSWORD and check whether the enter string matches the stored master password
-     *
-     * @param in input stream
-     * @param out output stream
-     * @return true matches
-     * @return false not matches
-     */
     const bool checkMasterPassword(std::istream &in, std::ostream &out)
     {
         std::string input;
@@ -96,27 +85,33 @@ namespace
         else
             return false;
     }
-}
 
-namespace TP
-{
-    void interactiveCreate(std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData>&& data)
+    const bool login(std::istream &in, std::ostream &out)
     {
         out << "Please enter MASTER PASSWORD to log in.\nMASTER PASSWORD: ";
         if (!checkMasterPassword(in, out))
         {
             out << "Password doesn't match. Log in failed.\n"
                 << std::endl;
-            return;
+            return false;
         }
         else
         {
             out << "Logging in success.\n"
                 << std::endl;
+            return true;
         }
+    }
+
+    void interactiveCreate(std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data)
+    {
+        out << "Create Keychain\n============================" << std::endl;
+
+        if (!login(in, out))
+            return;
 
         KeyChain key;
-        out << "Create Keychain\n============================" << std::endl;
+
         while (true)
         {
             out << "name: ";
@@ -164,8 +159,8 @@ namespace TP
         out << "Discription for \"" << key.name << "\": ";
         std::getline(in, key.brief);
 
-        out << "The username of the account: ";
-        std::getline(in, key.username);
+        out << "The name of the account: ";
+        std::getline(in, key.account_name);
 
         uint8_t length = 16;
         std::string input;

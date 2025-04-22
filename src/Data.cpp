@@ -48,7 +48,7 @@ namespace TP
                     KeyChain output = {
                         json[i]["name"],
                         json[i]["brief"],
-                        json[i]["username"],
+                        json[i]["account_name"],
                         json[i]["encrypted_password"]};
                     return output;
                 }
@@ -65,7 +65,7 @@ namespace TP
             nlohmann::json overwritten_element = {
                 {"name", key.name},
                 {"brief", key.brief},
-                {"username", key.username},
+                {"account_name", key.account_name},
                 {"encryted_password", key.encryted_password}};
             json[offset] = overwritten_element;
 
@@ -77,7 +77,7 @@ namespace TP
             nlohmann::json new_element = {
                 {"name", key.name},
                 {"brief", key.brief},
-                {"username", key.username},
+                {"account_name", key.account_name},
                 {"encrypted_password", key.encryted_password}};
             json.push_back(new_element);
         }
