@@ -12,6 +12,20 @@
 
 namespace TP
 {
+    struct EncryptedData
+    {
+        std::vector<unsigned char> nonce;
+        std::vector<unsigned char> ciphertext;
+        std::vector<unsigned char> salt;
+    };
+
+    struct EncryptedStr
+    {
+        std::string nonce;
+        std::string ciphertext;
+        std::string salt;
+    };
+
     /**
      * @brief the structure to restore the infomation of a password
      *
@@ -21,6 +35,6 @@ namespace TP
         std::string name;              // the name of the password ("Github" for example)
         std::string brief;             // a brief discription for the password
         std::string account_name;          // the account_name for the account
-        std::string encryted_password; // the password after encrytion
+        EncryptedStr encrypted_password;   // the password after encrytion
     };
 } // namespace TP

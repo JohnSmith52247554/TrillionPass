@@ -9,13 +9,16 @@
  */
 
 #include <Finder.hpp>
+#include <MasterPassword.hpp>
+#include <Encrypter.hpp>
 
 namespace TP
 {
     void find(std::string name, std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data)\
     {
         out << "Find Keychain\n============================" << std::endl;
-        if (!login(in, out))
+        std::string master_password;
+        if (!login(in, out, master_password))
             return;
         
         if (name == "")
@@ -50,8 +53,9 @@ namespace TP
             out << "Keychain\n    name: " << result.name << "\n    brief: " << result.brief << "\n    account name: " << result.account_name << std::endl;
             copyToClipboard(result.account_name);
             out << "Account name has been copied to the clipboard. Press any key to continue.";
+            std::string decrypted = TP::decrypt(result.encrypted_password, master_password);
             in.get();
-            copyToClipboard(result.encryted_password);
+            copyToClipboard(decrypted);
             out << "Password has been copied to the clipboard." << std::endl;
         }
     }
@@ -59,15 +63,16 @@ namespace TP
     void listAllKeyChains(std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data)
     {
         out << "List All Keychains\n============================" << std::endl;
-        if (!login(in, out))
+        std::string master_password;
+        if (!login(in, out, master_password)) 
             return;
 
         for (size_t i = 0; i < data->size(); i++)
         {
             out << i + 1 << ":\n";
             auto key = data->find(i);
-            out << "name: " << key.name << '\n';
-            out << "brief" << key.brief << '\n';
+            out << "name:  " << key.name << '\n';
+            out << "brief: " << key.brief << '\n';
             out << std::endl;
         }
     }

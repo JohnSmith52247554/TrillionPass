@@ -34,6 +34,12 @@ PROJECT_PATH="${CMAKE_SOURCE_DIR}"
 TPASS_VERSION="${PROJECT_VERSION}"
 )
 
+find_package(PkgConfig REQUIRED)
+pkg_search_module(LIBSODIUM REQUIRED libsodium)
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${LIBSODIUM_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBSODIUM_LIBRARIES})
+
 if (WIN32)
-    target_link_libraries(${PROJECT_NAME} bcrypt)
+    target_link_libraries(${PROJECT_NAME} PRIVATE bcrypt)
 endif()

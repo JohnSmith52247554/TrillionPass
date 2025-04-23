@@ -11,9 +11,10 @@
 #include <Recorder.hpp>
 #include <Data.hpp>
 #include <Finder.hpp>
+#include <Encrypter.hpp>
 
 // TODO: choose the filepath according to username
-const std::string DATA_PATH = "/DATA/KeyChain.json";
+const std::string DATA_PATH = "/data/KeyChain.json";
 
 // structure to store command line parameters
 struct CLParameters
@@ -31,12 +32,26 @@ void test(int& argc, char** argv[])
         (*argv)[i] = new char[10];
     }
     (*argv)[0] = "pass";
-    (*argv)[1] = "-f";
-    (*argv)[2] = "taobao";
+    (*argv)[1] = "-c";
+    (*argv)[2] = "-i";
+}
+
+void setMasterPassword(std::string password)
+{
+    auto master_password = TP::hash(password);
+    std::ifstream i_file(std::string(PROJECT_PATH) + "/data/UserConfig.json");
+    nlohmann::json json;
+    i_file >> json;
+    json["master_password_hash"] = master_password;
+    i_file.close();
+    std::ofstream o_file(std::string(PROJECT_PATH) + "/data/UserConfig.json");
+    o_file << json.dump(4);
+    o_file.close();
 }
 
 int main(int argc, char* argv[])
 {
+    //setMasterPassword("password");
     //test(argc, &argv);
 
     // parse command
@@ -89,5 +104,8 @@ int main(int argc, char* argv[])
             std::cout << "Command not found." << std::endl;
         }
     }
+
+    std::cin.get();
+    
     return 0;
 }

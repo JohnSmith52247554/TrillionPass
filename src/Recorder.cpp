@@ -11,12 +11,8 @@
 #include <Recorder.hpp>
 #include <GenPassword.hpp>
 #include <Structure.hpp>
-
-namespace
-{
-    // TODO: encryt and save it in a file
-    const std::string MASTER_PASSWORD = "password";
-}
+#include <MasterPassword.hpp>
+#include <Encrypter.hpp>
 
 namespace TP
 {
@@ -58,56 +54,12 @@ namespace TP
 #endif
     }
 
-    const bool checkMasterPassword(std::istream &in, std::ostream &out)
-    {
-        std::string input;
-
-#ifdef _WIN32
-        char ch;
-        while ((ch = _getch()) != '\r') // get character until newline
-        {
-            if (ch == '\b' && !input.empty())
-            { // deal with delete
-                input.pop_back();
-                out << "\b \b"; // clear console
-            }
-            else if (ch != '\b')
-            {
-                input.push_back(ch);
-                out << "*";
-            }
-        }
-        out << "\n";
-#endif
-
-        if (input == MASTER_PASSWORD)
-            return true;
-        else
-            return false;
-    }
-
-    const bool login(std::istream &in, std::ostream &out)
-    {
-        out << "Please enter MASTER PASSWORD to log in.\nMASTER PASSWORD: ";
-        if (!checkMasterPassword(in, out))
-        {
-            out << "Password doesn't match. Log in failed.\n"
-                << std::endl;
-            return false;
-        }
-        else
-        {
-            out << "Logging in success.\n"
-                << std::endl;
-            return true;
-        }
-    }
-
     void interactiveCreate(std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data)
     {
         out << "Create Keychain\n============================" << std::endl;
 
-        if (!login(in, out))
+        std::string master_password;
+        if (!login(in, out, master_password))
             return;
 
         KeyChain key;
@@ -137,7 +89,8 @@ namespace TP
                 {
                     out << "The original keychain will vanish FOREVER. To force overwrite, please enter the master password. Enter any thing other to abandon overwriting." << std::endl;
                     out << "MASTER PASSWORD: ";
-                    if (checkMasterPassword(in, out))
+                    std::string str;
+                    if (checkMasterPassword(in, out, str))
                     {
                         out << "Keychain \"" << key.name << "\" will be overwritten." << std::endl;
                         data->erase(key.name);
@@ -159,12 +112,22 @@ namespace TP
         out << "Discription for \"" << key.name << "\": ";
         std::getline(in, key.brief);
 
-        out << "The name of the account: ";
-        std::getline(in, key.account_name);
 
-        uint8_t length = 16;
+        while (true)
+        {
+            out << "The name of the account: ";
+            std::getline(in, key.account_name);
+            if (key.account_name == "")
+            {
+                out << "Account name can not be empty." << std::endl;
+                continue;
+            }
+            break;
+        }
+
+        uint8_t length = 20;
         std::string input;
-        out << "Length of the password to be generated [\033[4m16\033[0m]: ";
+        out << "Length of the password to be generated [\033[4m20\033[0m]: ";
         std::getline(in, input);
         if (input != "")
             length = std::stoi(input);
@@ -184,12 +147,12 @@ namespace TP
             special = false;
 
         std::string raw_password = TP::generate(length, upper, numbers, special);
-
         out << "Creating keychain success." << std::endl;
         copyToClipboard(raw_password);
         out << "Password has been copied to the clipboard." << std::endl;
 
-        key.encryted_password = raw_password;
+        auto encrypted = TP::encrypt(raw_password, master_password);
+        key.encrypted_password = encrypted;
 
         data->add(key);
         data->flush();

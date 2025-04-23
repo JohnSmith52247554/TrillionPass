@@ -23,26 +23,6 @@ namespace TP
     void copyToClipboard(const std::string &text);
 
     /**
-     * @brief ask the user to enter the MASTER PASSWORD and check whether the enter string matches the stored master password
-     *
-     * @param in input stream
-     * @param out output stream
-     * @return true matches
-     * @return false not matches
-     */
-    const bool checkMasterPassword(std::istream &in, std::ostream &out);
-
-    /**
-     * @brief ask the user to login through master password
-     *
-     * @param in input stream
-     * @param out output stream
-     * @return true matches
-     * @return false not matches
-     */
-    const bool login(std::istream &in, std::ostream &out);
-
-    /**
      * @brief create a keychain interatively and save it
      * 
      * @param in input stream

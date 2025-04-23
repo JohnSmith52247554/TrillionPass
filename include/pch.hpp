@@ -30,3 +30,4 @@
 #endif
 
 #include <nlohmann/json.hpp>
+#include <sodium.h>

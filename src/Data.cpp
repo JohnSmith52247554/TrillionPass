@@ -61,7 +61,9 @@ namespace TP
             key->name = (*it)["name"];
             key->brief = (*it)["brief"];
             key->account_name = (*it)["account_name"];
-            key->encryted_password = (*it)["encryted_password"];
+            key->encrypted_password.nonce = (*it)["encryted_password"]["nonce"];
+            key->encrypted_password.ciphertext = (*it)["encryted_password"]["ciphertext"];
+            key->encrypted_password.salt = (*it)["encryted_password"]["salt"];
         }
 
         JsonPData::JsonPData(const std::string filepath)
@@ -70,7 +72,7 @@ namespace TP
             std::ifstream file(filepath);
             if (!file.is_open())
                 throw std::runtime_error("cannot open keychain data file " + filepath);
-            json << file;
+            file >> json;
             file.close();
         }
 
@@ -95,11 +97,17 @@ namespace TP
             {
                 if (json[i]["name"] == name)
                 {
+                    EncryptedStr es = {
+                        json[i]["encrypted_password"]["nonce"],
+                        json[i]["encrypted_password"]["ciphertext"],
+                        json[i]["encrypted_password"]["salt"]
+                    };
                     KeyChain output = {
                         json[i]["name"],
                         json[i]["brief"],
                         json[i]["account_name"],
-                        json[i]["encrypted_password"]};
+                        es
+                    };
                     return output;
                 }
             }
@@ -114,12 +122,17 @@ namespace TP
                 KeyChain blank_output;
                 return blank_output;
             }
-
+            EncryptedStr es = {
+                json[offset]["encrypted_password"]["nonce"],
+                json[offset]["encrypted_password"]["ciphertext"],
+                json[offset]["encrypted_password"]["salt"]
+            };
             KeyChain output = {
                 json[offset]["name"],
-                json[offset]["brief"],
-                json[offset]["account_name"],
-                json[offset]["encrypted_password"]};
+                json[offset]["brief"], 
+                json[offset]["account_name"], 
+                es
+            };
             return output;
         }
 
@@ -128,11 +141,17 @@ namespace TP
             if (offset < 0 || offset >= json.size())
                 return false;
 
+            nlohmann::json ep = {
+                {"nonce", key.encrypted_password.nonce},
+                {"ciphertext", key.encrypted_password.ciphertext},
+                {"salt", key.encrypted_password.salt}
+            };
             nlohmann::json overwritten_element = {
                 {"name", key.name},
                 {"brief", key.brief},
                 {"account_name", key.account_name},
-                {"encryted_password", key.encryted_password}};
+                {"encryted_password", ep}
+            };
             json[offset] = overwritten_element;
 
             return true;
@@ -140,11 +159,17 @@ namespace TP
 
         void JsonPData::add(KeyChain key)
         {
-            nlohmann::json new_element = {
-                {"name", key.name},
-                {"brief", key.brief},
-                {"account_name", key.account_name},
-                {"encrypted_password", key.encryted_password}};
+            nlohmann::json ep = {
+                {"nonce", key.encrypted_password.nonce},
+                {"ciphertext", key.encrypted_password.ciphertext},
+                {"salt", key.encrypted_password.salt}
+            };
+            nlohmann::json new_element = { 
+                {"name", key.name}, 
+                {"brief", key.brief}, 
+                {"account_name", key.account_name}, 
+                {"encrypted_password", ep}
+                };
             json.push_back(new_element);
         }
 
@@ -172,11 +197,17 @@ namespace TP
 
         void JsonPData::flush()
         {
+            try{
             std::ofstream file(file_path);
             if (!file.is_open())
                 throw std::runtime_error("cannot open keychain data file " + file_path);
             file << json.dump(4);
             file.close();
+            }
+            catch(std::exception& e)
+            {
+                std::cout << e.what() << std::endl;
+            }
         }
 
         size_t JsonPData::size() const
