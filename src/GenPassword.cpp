@@ -14,20 +14,6 @@
 
 namespace
 {
-    const std::vector<char> lower_char = {
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-        'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-        'u', 'v', 'w', 'x', 'y', 'z'};
-    const std::vector<char> upper_char = {
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-        'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-        'U', 'V', 'W', 'X', 'Y', 'Z'};
-    const std::vector<char> numbers = {
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    const std::vector<char> special_char = {
-        '~', '!', '@', '#', '$', '%', '^', '*', '(', ')',
-        '-', '_', '+', '=', '[', ']', '{', '}', '?', '/'};
-
     // TODO: support other systems
 #ifdef _WIN32
     /**
@@ -80,13 +66,13 @@ namespace TP
        if (length <= static_cast<unsigned char>(upper) + static_cast<unsigned char>(number) + static_cast<unsigned char>(special))
            throw std::runtime_error("length too small to meet the request");
 
-       std::vector<const std::vector<char> *> char_pool = {&lower_char};
+       std::vector<const std::vector<char> *> char_pool = {&CharPool::lower_char};
        if (upper)
-           char_pool.push_back(&upper_char);
+           char_pool.push_back(&CharPool::upper_char);
        if (number)
-           char_pool.push_back(&numbers);
+           char_pool.push_back(&CharPool::numbers);
        if (special)
-           char_pool.push_back(&special_char);
+           char_pool.push_back(&CharPool::special_char);
 
        uint32_t pool_size = 0u;
        for (auto pool : char_pool)

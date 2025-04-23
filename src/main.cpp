@@ -12,6 +12,7 @@
 #include <Data.hpp>
 #include <Finder.hpp>
 #include <Encrypter.hpp>
+#include <MasterPassword.hpp>
 
 // TODO: choose the filepath according to username
 const std::string DATA_PATH = "/data/KeyChain.json";
@@ -36,22 +37,9 @@ void test(int& argc, char** argv[])
     (*argv)[2] = "-i";
 }
 
-void setMasterPassword(std::string password)
-{
-    auto master_password = TP::hash(password);
-    std::ifstream i_file(std::string(PROJECT_PATH) + "/data/UserConfig.json");
-    nlohmann::json json;
-    i_file >> json;
-    json["master_password_hash"] = master_password;
-    i_file.close();
-    std::ofstream o_file(std::string(PROJECT_PATH) + "/data/UserConfig.json");
-    o_file << json.dump(4);
-    o_file.close();
-}
-
 int main(int argc, char* argv[])
 {
-    //setMasterPassword("password");
+    //TEMP::setMasterPassword("password");
     //test(argc, &argv);
 
     // parse command
@@ -73,7 +61,7 @@ int main(int argc, char* argv[])
         // create new keychain
         if (parameters.command == "-c")
         {
-            if (parameters.argument[0] == "-i") // interactive create
+            if (parameters.argument.size() > 0 && parameters.argument[0] == "-i") // interactive create
             {
                 std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::JsonPData>(std::string(PROJECT_PATH) + DATA_PATH);
 
@@ -98,6 +86,13 @@ int main(int argc, char* argv[])
             std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::JsonPData>(std::string(PROJECT_PATH) + DATA_PATH);
 
             TP::listAllKeyChains(std::cin, std::cout, std::move(data));
+        }
+        else if (parameters.command == "-mp")   // master password
+        {
+            if (parameters.argument.size() > 0 && parameters.argument[0] == "-c")   // change
+            {
+                TP::changeMasterPassword(std::cin, std::cout);
+            }
         }
         else
         {

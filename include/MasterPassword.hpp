@@ -38,4 +38,17 @@ namespace TP
      * @param raw_input the raw input string of user
      */
     const bool checkMasterPasswordHash(std::string raw_input);
+
+    void changeMasterPassword(std::istream &in, std::ostream &out);
+
 } // namespace TP
+
+namespace TEMP
+{
+    void setMasterPassword(std::string password);
+
+    const bool chararcherCheck(const std::string& password);
+    const bool consecutiveCheck(const std::string& password, const unsigned char max_repeat_time);
+
+    void securetInput(std::istream&in, std::ostream& out, std::string &input);
+}

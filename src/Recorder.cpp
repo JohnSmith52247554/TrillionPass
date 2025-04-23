@@ -147,6 +147,7 @@ namespace TP
             special = false;
 
         std::string raw_password = TP::generate(length, upper, numbers, special);
+        assert(raw_password.size() == length);
         out << "Creating keychain success." << std::endl;
         copyToClipboard(raw_password);
         out << "Password has been copied to the clipboard." << std::endl;

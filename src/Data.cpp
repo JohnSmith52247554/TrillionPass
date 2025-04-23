@@ -61,9 +61,9 @@ namespace TP
             key->name = (*it)["name"];
             key->brief = (*it)["brief"];
             key->account_name = (*it)["account_name"];
-            key->encrypted_password.nonce = (*it)["encryted_password"]["nonce"];
-            key->encrypted_password.ciphertext = (*it)["encryted_password"]["ciphertext"];
-            key->encrypted_password.salt = (*it)["encryted_password"]["salt"];
+            key->encrypted_password.nonce = (*it)["encrypted_password"]["nonce"];
+            key->encrypted_password.ciphertext = (*it)["encrypted_password"]["ciphertext"];
+            key->encrypted_password.salt = (*it)["encrypted_password"]["salt"];
         }
 
         JsonPData::JsonPData(const std::string filepath)
@@ -117,6 +117,7 @@ namespace TP
 
         TP::KeyChain JsonPData::find(const int offset)
         {
+            try{
             if (offset < 0 || offset >= json.size())
             {
                 KeyChain blank_output;
@@ -125,8 +126,7 @@ namespace TP
             EncryptedStr es = {
                 json[offset]["encrypted_password"]["nonce"],
                 json[offset]["encrypted_password"]["ciphertext"],
-                json[offset]["encrypted_password"]["salt"]
-            };
+                json[offset]["encrypted_password"]["salt"]};
             KeyChain output = {
                 json[offset]["name"],
                 json[offset]["brief"], 
@@ -134,6 +134,11 @@ namespace TP
                 es
             };
             return output;
+        }
+            catch(std::exception& e)
+            {
+                std::cout << e.what() << std::endl;
+            }
         }
 
         const bool JsonPData::overwrite(int offset, KeyChain key)
@@ -150,7 +155,7 @@ namespace TP
                 {"name", key.name},
                 {"brief", key.brief},
                 {"account_name", key.account_name},
-                {"encryted_password", ep}
+                {"encrypted_password", ep}
             };
             json[offset] = overwritten_element;
 
