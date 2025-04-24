@@ -24,6 +24,8 @@ namespace TP
      */
     void find(std::string name, std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data);
 
+    void deleteKeyChain(std::string name, std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data);
+
     /**
      * @brief List the name and brief of all of the keychains in a file.
      * 

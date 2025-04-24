@@ -60,6 +60,55 @@ namespace TP
         }
     }
 
+    void deleteKeyChain(std::string name, std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data)
+    {
+        out << "Delete Keychain\n============================" << std::endl;
+
+        std::string master_password;
+        if (!login(in, out, master_password))
+            return;
+
+        if (name == "")
+        {
+            while (true)
+            {
+                out << "The name of keychain to be delete: ";
+                std::getline(in, name);
+                if (name == "")
+                {
+                    out << "The name should not be empty, please try again." << std::endl;
+                    continue;
+                }
+                if (name.find(' ') != std::string::npos)
+                {
+                    out << "The name should not contain space, please try again." << std::endl;
+                    continue;
+                }
+                break;
+            }
+        }
+
+        auto result = data->find(name);
+        if (result.name == "")
+        {
+            out << "Could not found keychain \"" << name << "\"." << std::endl;
+            return;
+        }
+
+        out << "Keychain\n    name: " << result.name << "\n    brief: " << result.brief << "\n    account name: " << result.account_name << std::endl;
+        out << "The keychain will be deleted forever.\nTo force detele, please enter the master password.\nEnter anything else to abort.\nMASTER PASSWORD: ";
+        if (!checkMasterPassword(in, out, master_password))
+        {
+            out << "Aborted." << std::endl;
+            return;
+        }
+
+        data->erase(name);
+        data->flush();
+
+        out << "Delete keychain succuss." << std::endl;
+    }
+
     void listAllKeyChains(std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data)
     {
         out << "List All Keychains\n============================" << std::endl;

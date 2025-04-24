@@ -69,7 +69,7 @@ namespace
         std::string str;
         for (const auto &c : vector)
         {
-            if (c == '\000' || c == '\u0000')
+            if (c == 0u)
                 break;
             str.push_back(c);
         }
@@ -159,6 +159,8 @@ namespace
         base64.resize(b64_maxlen);
         if (sodium_bin2base64(base64.data(), b64_maxlen, (const unsigned char *)binary.data(), binary.size(), sodium_base64_VARIANT_ORIGINAL) == NULL)
             throw std::runtime_error("base 64 failed");
+        while (base64.back() == '\0')
+            base64.pop_back();
         return base64;
     }
 
@@ -168,7 +170,7 @@ namespace
         std::vector<unsigned char> binary;
         binary.resize(base64.size());
         size_t bin_actual_len;
-        if (sodium_base642bin(binary.data(), binary.size(), base64.data(), base64.size() - 1, NULL, &bin_actual_len, NULL, sodium_base64_VARIANT_ORIGINAL) != 0)
+        if (sodium_base642bin(binary.data(), binary.size(), base64.data(), base64.size(), NULL, &bin_actual_len, NULL, sodium_base64_VARIANT_ORIGINAL) != 0)
             throw std::runtime_error("base 64 failed");
         binary.resize(bin_actual_len);
         return binary;

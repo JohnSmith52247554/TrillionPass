@@ -117,7 +117,6 @@ namespace TP
 
         TP::KeyChain JsonPData::find(const int offset)
         {
-            try{
             if (offset < 0 || offset >= json.size())
             {
                 KeyChain blank_output;
@@ -134,11 +133,7 @@ namespace TP
                 es
             };
             return output;
-        }
-            catch(std::exception& e)
-            {
-                std::cout << e.what() << std::endl;
-            }
+            
         }
 
         const bool JsonPData::overwrite(int offset, KeyChain key)
@@ -202,17 +197,11 @@ namespace TP
 
         void JsonPData::flush()
         {
-            try{
             std::ofstream file(file_path);
             if (!file.is_open())
                 throw std::runtime_error("cannot open keychain data file " + file_path);
             file << json.dump(4);
             file.close();
-            }
-            catch(std::exception& e)
-            {
-                std::cout << e.what() << std::endl;
-            }
         }
 
         size_t JsonPData::size() const

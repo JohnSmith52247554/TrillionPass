@@ -87,7 +87,7 @@ namespace TP
                 std::getline(in, input);
                 if (input == "y" || input == "Y" || input == "yes" || input == "Yes" || input == "YES")
                 {
-                    out << "The original keychain will vanish FOREVER. To force overwrite, please enter the master password. Enter any thing other to abandon overwriting." << std::endl;
+                    out << "The original keychain will be deleted FOREVER.\nTo force overwrite, please enter the master password.\nEnter any thing other to abort." << std::endl;
                     out << "MASTER PASSWORD: ";
                     std::string str;
                     if (checkMasterPassword(in, out, str))
@@ -98,7 +98,7 @@ namespace TP
                     }
                     else
                     {
-                        out << "Abandon overwriting." << std::endl;
+                        out << "Aborted." << std::endl;
                     }
                 }
 

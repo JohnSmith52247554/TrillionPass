@@ -33,8 +33,8 @@ void test(int& argc, char** argv[])
         (*argv)[i] = new char[10];
     }
     (*argv)[0] = "pass";
-    (*argv)[1] = "-c";
-    (*argv)[2] = "-i";
+    (*argv)[1] = "-l";
+    //(*argv)[2] = "";
 }
 
 int main(int argc, char* argv[])
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
         {
             std::cout << TPASS_VERSION << std::endl;
         }
-        else if (parameters.command == "-l")    // list all keychain
+        else if (parameters.command == "-l")    // list all keychains
         {
             std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::JsonPData>(std::string(PROJECT_PATH) + DATA_PATH);
 
@@ -93,6 +93,15 @@ int main(int argc, char* argv[])
             {
                 TP::changeMasterPassword(std::cin, std::cout);
             }
+        }
+        else if (parameters.command == "-d")    // delete
+        {
+            if (parameters.argument.size() == 0)
+                parameters.argument.push_back("");
+
+            std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::JsonPData>(std::string(PROJECT_PATH) + DATA_PATH);
+
+            TP::deleteKeyChain(parameters.argument[0], std::cin, std::cout, std::move(data));
         }
         else
         {
