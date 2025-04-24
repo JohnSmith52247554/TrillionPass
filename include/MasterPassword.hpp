@@ -41,6 +41,9 @@ namespace TP
 
     void changeMasterPassword(std::istream &in, std::ostream &out);
 
+    const bool existsMasterPassword();
+    void initMasterPassword(std::istream& in, std::ostream& out);
+
 } // namespace TP
 
 namespace TEMP

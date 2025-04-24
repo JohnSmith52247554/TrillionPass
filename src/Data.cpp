@@ -14,58 +14,6 @@ namespace TP
 {
     namespace Data
     {
-        DataIterator &JsonDI::operator++()
-        {
-            ++it;
-            return *this;
-        }
-
-        DataIterator &JsonDI::operator--()
-        {
-            --it;
-            return *this;
-        }
-
-        DataIterator &JsonDI::operator+=(size_t n)
-        {
-            it += n;
-            return *this;
-        }
-
-        DataIterator &JsonDI::operator-=(size_t n)
-        {
-            it -= n;
-            return *this;
-        }
-
-        KeyChain &JsonDI::operator*() const
-        {
-            parseJsonElement();
-            return *key;
-        }
-
-        KeyChain *JsonDI::operator->() const
-        {
-            parseJsonElement();
-            return key.get();
-        }
-
-        bool JsonDI::operator==(const JsonDI &other) const
-        {
-            return it == other.it;
-        }
-
-        void JsonDI::parseJsonElement() const
-        {
-            key = std::make_unique<KeyChain>();
-            key->name = (*it)["name"];
-            key->brief = (*it)["brief"];
-            key->account_name = (*it)["account_name"];
-            key->encrypted_password.nonce = (*it)["encrypted_password"]["nonce"];
-            key->encrypted_password.ciphertext = (*it)["encrypted_password"]["ciphertext"];
-            key->encrypted_password.salt = (*it)["encrypted_password"]["salt"];
-        }
-
         JsonPData::JsonPData(const std::string filepath)
             : file_path(filepath)
         {
@@ -209,14 +157,147 @@ namespace TP
             return json.size();
         }
 
-        JsonDI JsonPData::begin()
+        BinaryPData::BinaryPData(const std::string filepath)
+            : file_path(filepath)
         {
-            return JsonDI(json.begin());
+            std::ifstream file(file_path);
+            if (!file.is_open())
+                throw std::runtime_error("cannot open keychain data file " + filepath);
+            
+            while (true)
+            {
+                KeyChain key;
+                deserializeStr(file, key.name);
+                deserializeStr(file, key.brief);
+                deserializeStr(file, key.account_name);
+                deserializeStr(file, key.encrypted_password.ciphertext);
+                deserializeStr(file, key.encrypted_password.nonce);
+                deserializeStr(file, key.encrypted_password.salt);
+                if (file.eof())
+                    break;
+                data.push_back(key);
+            }
+            file.close();
         }
 
-        JsonDI JsonPData::end()
+        BinaryPData::~BinaryPData()
         {
-            return JsonDI(json.end());
+            flush();
+        }
+
+        const int BinaryPData::exists(std::string name)
+        {
+            int i = 0;
+            for (; i < data.size(); i++)
+            {
+                if (data[i].name == name)
+                    return i;
+            }
+            return -1;
+        }
+
+        TP::KeyChain BinaryPData::find(std::string name)
+        {
+            for (int i = 0; i < data.size(); i++)
+            {
+                if (data[i].name == name)
+                    return data[i];
+            }
+            KeyChain blank_keychain;
+            return blank_keychain;
+        }
+
+        TP::KeyChain BinaryPData::find(const int offset)
+        {
+            if (offset >= 0 && offset < data.size())
+            {
+                return data[offset];
+            }
+            KeyChain blank_keychain;
+            return blank_keychain;
+        }
+
+        const bool BinaryPData::overwrite(int offset, TP::KeyChain key)
+        {
+            if (offset < 0 || offset >= data.size())
+                return false;
+            data[offset] = key;
+            return true;
+        }
+
+        void BinaryPData::add(TP::KeyChain key)
+        {
+            data.push_back(key);
+        }
+
+        const bool BinaryPData::erase(const int offset)
+        {
+            if (offset < 0 || offset >= data.size())
+                return false;
+            data.erase(data.begin() + offset);
+            return true;
+        }
+
+        const bool BinaryPData::erase(const std::string name)
+        {
+            for (auto it = data.begin(); it != data.end(); it++)
+            {
+                if ((*it).name == name)
+                {
+                    data.erase(it);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        void BinaryPData::flush()
+        {
+            std::ofstream file(file_path);
+            if (!file.is_open())
+                throw std::runtime_error("cannot open keychain data file " + file_path);
+
+            for (auto& key : data)
+            {
+                serializeStr(file, key.name);
+                serializeStr(file, key.brief);
+                serializeStr(file, key.account_name);
+                serializeStr(file, key.encrypted_password.ciphertext);
+                serializeStr(file, key.encrypted_password.nonce);
+                serializeStr(file, key.encrypted_password.salt);
+            }
+            file.close();
+        }
+
+        size_t BinaryPData::size() const
+        {
+            return data.size();
+        }
+
+        void serializeStr(std::ofstream &file, std::string &str)
+        {
+            size_t size = str.size();
+            file.write(reinterpret_cast<char *>(&size), sizeof(size));
+            for (size_t i = 0; i < size; ++i)
+            {
+                unsigned char byte = str[i];
+                file << std::hex << std::setw(2) << std::setfill('0') << (int)byte;
+            }
+        }
+
+        void deserializeStr(std::ifstream &file, std::string &str)
+        {
+            std::string hex_str;
+            size_t size;
+            file.read(reinterpret_cast<char *>(&size), sizeof(size));
+            hex_str.resize(size * 2);
+            file.read(reinterpret_cast<char*>(hex_str.data()), hex_str.size());
+            for (size_t i = 0; i < hex_str.size(); i += 2)
+            {
+                std::string byte = hex_str.substr(i, 2);
+                char chr = (char)(int)strtol(byte.c_str(), NULL, 16);
+                str.push_back(chr);
+            }
         }
     }
 }

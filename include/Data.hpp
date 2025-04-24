@@ -17,52 +17,6 @@ namespace TP
     namespace Data
     {
         /**
-         * @brief base class for iterator of simple password database
-         *
-         */
-        class DataIterator : public std::iterator<std::random_access_iterator_tag, KeyChain>
-        {
-        public:
-            virtual ~DataIterator() {}
-
-            virtual DataIterator &operator++() = 0;
-            virtual DataIterator &operator--() = 0;
-            virtual DataIterator &operator+=(size_t n) = 0;
-            virtual DataIterator &operator-=(size_t n) = 0;
-
-            virtual KeyChain &operator*() const = 0;
-            virtual KeyChain *operator->() const = 0;
-        };
-
-        /**
-         * @brief iterator for JsonPData
-         * 
-         */
-        class JsonDI : public DataIterator
-        {
-        private:
-            nlohmann::json::iterator it;
-            mutable std::unique_ptr<KeyChain> key;
-
-        public:
-            JsonDI(nlohmann::json::iterator it) : it(it) {}
-
-            virtual DataIterator &operator++() override;
-            virtual DataIterator &operator--() override;
-            virtual DataIterator &operator+=(size_t n) override;
-            virtual DataIterator &operator-=(size_t n) override;
-
-            virtual KeyChain &operator*() const override;
-            virtual KeyChain *operator->() const override;
-            
-            bool operator==(const JsonDI &other) const;
-            bool operator!=(const JsonDI &other) const { return !operator==(other); }
-
-        private:
-            void parseJsonElement() const;
-        };
-
-        /**
          * @brief abstract base class for simple password database
          *
          */
@@ -140,7 +94,7 @@ namespace TP
              * 
              * @return size_t 
              */
-            virtual size_t size() const = 0;
+            virtual inline size_t size() const = 0;
         };
 
         /**
@@ -165,22 +119,31 @@ namespace TP
             virtual const bool erase(const int offset) override;
             virtual const bool erase(const std::string name) override;
             virtual void flush() override;
-            virtual size_t size() const override;
-
-            /**
-             * @brief return the first iterator of the database
-             *
-             * @return JsonDI
-             */
-            JsonDI begin();
-            /**
-             * @brief return the end iterator of the database
-             *
-             * @return JsonDI 
-             */
-            JsonDI end();
+            virtual inline size_t size() const override;
         };
 
-        // TODO: BinaryPData
+        class BinaryPData : public PasswordData
+        {
+        private:
+            std::string file_path;
+            std::vector<TP::KeyChain> data;
+
+        public:
+            BinaryPData(const std::string filepath);
+            ~BinaryPData();
+
+            virtual const int exists(std::string name) override;
+            virtual TP::KeyChain find(std::string name) override;
+            virtual TP::KeyChain find(const int offset) override;
+            virtual const bool overwrite(int offset, TP::KeyChain key) override;
+            virtual void add(TP::KeyChain key) override;
+            virtual const bool erase(const int offset) override;
+            virtual const bool erase(const std::string name) override;
+            virtual void flush() override;
+            virtual inline size_t size() const override;
+        };
+
+        void serializeStr(std::ofstream &file, std::string &str);
+        void deserializeStr(std::ifstream &file, std::string &str);
     }
 }

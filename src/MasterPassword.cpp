@@ -13,7 +13,7 @@
 #include <Data.hpp>
 #include <GenPassword.hpp>
 
-const std::string USER_CONFIG_PATH = std::string(PROJECT_PATH) + "/data/UserConfig.json";
+const std::string USER_CONFIG_PATH = std::string(PROJECT_PATH) + "/data/UserConfig.bin";
 
 namespace TP
 {
@@ -46,10 +46,8 @@ namespace TP
         std::ifstream file(USER_CONFIG_PATH);
         if (!file.is_open())
             throw std::runtime_error("open user config failed: " + USER_CONFIG_PATH);
-        
-        nlohmann::json json;
-        file >> json;
-        std::string master_password_hash = json["master_password_hash"];
+        std::string master_password_hash;
+        TP::Data::deserializeStr(file, master_password_hash);
         file.close();
 
         return TP::verifyHashing(raw_input, master_password_hash);
@@ -120,6 +118,64 @@ namespace TP
         }
         out << "Changing master password complete." << std::endl;
     }
+
+    const bool existsMasterPassword()
+    {
+        if(!std::filesystem::exists(USER_CONFIG_PATH))
+            return false;
+        return true;
+    }
+
+    void initMasterPassword(std::istream &in, std::ostream &out)
+    {
+        out << "Init Master Password\n================" << std::endl;
+        out << "To use TrillionPass, you need to set a master password.\nThe master password are used to encrypt other password.\nEvery time when you use TrillionPass, the program will ask you to enter the master password,\nfor identifing as well as decrypting the password database.\nPlease keep the master password safe.\n" << std::endl;
+        out << "\nThe MASTER PASSWORD should matches the following conditions:\n";
+        out << "\tFirstly, the length of the master password shoud be no less than twelve characters.\n";
+        out << "\tSecondly, the master password should CONTAIN AND ONLY CONTAIN lower characters, upper characters, numbers and special characters.\n";
+        out << "\tThirdly, there should not be a character appears consecutively more than two times.\n" << std::endl;
+
+        std::string mp;
+        while (true)
+        {
+            out << "Please enter the master password: ";
+            TEMP::securetInput(in, out, mp);
+
+            if (mp.size() < 12)
+            {
+                out << "the length of the master password shoud be no less than twelve characters." << std::endl;
+                continue;
+            }
+            if (!TEMP::chararcherCheck(mp))
+            {
+                out << "The master password should CONTAIN AND ONLY CONTAIN lower characters, upper characters, numbers and special characters." << std::endl;
+                continue;
+            }
+            if (!TEMP::consecutiveCheck(mp, 2))
+            {
+                out << "There should not be a character appears consecutively more than two times." << std::endl;
+                continue;
+            }
+
+            out << "Please enter the master password again: ";
+            std::string repeated_mp;
+            TEMP::securetInput(in, out, repeated_mp);
+            if (repeated_mp != mp)
+            {
+                out << "The input is different." << std::endl;
+                continue;
+            }
+
+            break;
+        }
+
+        out << "Saving the master password." << std::endl;
+        std::ofstream file(USER_CONFIG_PATH);
+        if (!file.is_open())
+            throw std::runtime_error("failed to create config file");
+        file.close();
+        TEMP::setMasterPassword(mp);
+    }
 }
 
 namespace TEMP
@@ -127,13 +183,8 @@ namespace TEMP
     void setMasterPassword(std::string password)
     {
         auto master_password = TP::hash(password);
-        std::ifstream i_file(std::string(PROJECT_PATH) + "/data/UserConfig.json");
-        nlohmann::json json;
-        i_file >> json;
-        json["master_password_hash"] = master_password;
-        i_file.close();
-        std::ofstream o_file(std::string(PROJECT_PATH) + "/data/UserConfig.json");
-        o_file << json.dump(4);
+        std::ofstream o_file(USER_CONFIG_PATH);
+        TP::Data::serializeStr(o_file, master_password);
         o_file.close();
     }
 

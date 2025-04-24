@@ -24,6 +24,14 @@ namespace TP
      */
     void find(std::string name, std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data);
 
+    /**
+     * @brief Delete certain keychain in the file.
+     *
+     * @param name The name of keychain. If name is blank (""), the fuction will ask the user to enter a valid name.
+     * @param in input stream
+     * @param out output stream
+     * @param data the data to search
+     */
     void deleteKeyChain(std::string name, std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data);
 
     /**

@@ -16,6 +16,7 @@
 
 // TODO: choose the filepath according to username
 const std::string DATA_PATH = "/data/KeyChain.json";
+const std::string BINARY_DATA_PATH = "/data/KeyChain.bin";
 
 // structure to store command line parameters
 struct CLParameters
@@ -33,8 +34,8 @@ void test(int& argc, char** argv[])
         (*argv)[i] = new char[10];
     }
     (*argv)[0] = "pass";
-    (*argv)[1] = "-l";
-    //(*argv)[2] = "";
+    (*argv)[1] = "-c";
+    (*argv)[2] = "-i";
 }
 
 int main(int argc, char* argv[])
@@ -43,6 +44,9 @@ int main(int argc, char* argv[])
     //test(argc, &argv);
 
     // parse command
+    if (!TP::existsMasterPassword())
+        TP::initMasterPassword(std::cin, std::cout);
+
     CLParameters parameters;
     for (int i = 1; i < argc; i++)
     {
@@ -63,7 +67,7 @@ int main(int argc, char* argv[])
         {
             if (parameters.argument.size() > 0 && parameters.argument[0] == "-i") // interactive create
             {
-                std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::JsonPData>(std::string(PROJECT_PATH) + DATA_PATH);
+                std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::BinaryPData>(std::string(PROJECT_PATH) + BINARY_DATA_PATH);
 
                 TP::interactiveCreate(std::cin, std::cout, std::move(data));
             }
@@ -72,8 +76,8 @@ int main(int argc, char* argv[])
         {
             if (parameters.argument.size() == 0)
                 parameters.argument.push_back("");
-            
-            std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::JsonPData>(std::string(PROJECT_PATH) + DATA_PATH);
+
+            std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::BinaryPData>(std::string(PROJECT_PATH) + BINARY_DATA_PATH);
 
             TP::find(parameters.argument[0], std::cin, std::cout, std::move(data));
         }
@@ -83,7 +87,7 @@ int main(int argc, char* argv[])
         }
         else if (parameters.command == "-l")    // list all keychains
         {
-            std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::JsonPData>(std::string(PROJECT_PATH) + DATA_PATH);
+            std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::BinaryPData>(std::string(PROJECT_PATH) + BINARY_DATA_PATH);
 
             TP::listAllKeyChains(std::cin, std::cout, std::move(data));
         }
@@ -99,7 +103,7 @@ int main(int argc, char* argv[])
             if (parameters.argument.size() == 0)
                 parameters.argument.push_back("");
 
-            std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::JsonPData>(std::string(PROJECT_PATH) + DATA_PATH);
+            std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::BinaryPData>(std::string(PROJECT_PATH) + BINARY_DATA_PATH);
 
             TP::deleteKeyChain(parameters.argument[0], std::cin, std::cout, std::move(data));
         }

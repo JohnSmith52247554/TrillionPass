@@ -22,6 +22,8 @@
 #include <stdexcept>
 #include <algorithm>
 #include <iterator>
+#include <sstream>
+#include <iomanip>
 
 #ifdef _WIN32
 #include <windows.h>
