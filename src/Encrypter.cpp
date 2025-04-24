@@ -60,6 +60,13 @@ namespace TP
 
         return toString(decrypted);
     }
+
+    volatile void clean(std::string &&str)
+    {
+        for (auto& c : str)
+            c = '\0';
+        str.clear();
+    }
 } // namespace TP
 
 namespace

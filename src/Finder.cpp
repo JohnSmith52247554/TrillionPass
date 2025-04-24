@@ -14,7 +14,7 @@
 
 namespace TP
 {
-    void find(std::string name, std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data)\
+    void find(std::string name, std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data)
     {
         out << "Find Keychain\n============================" << std::endl;
         std::string master_password;
@@ -57,7 +57,9 @@ namespace TP
             in.get();
             copyToClipboard(decrypted);
             out << "Password has been copied to the clipboard." << std::endl;
+            TP::clean(std::move(decrypted));
         }
+        TP::clean(std::move(master_password));
     }
 
     void deleteKeyChain(std::string name, std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData> &&data)
@@ -67,6 +69,7 @@ namespace TP
         std::string master_password;
         if (!login(in, out, master_password))
             return;
+        TP::clean(std::move(master_password));
 
         if (name == "")
         {
@@ -97,11 +100,14 @@ namespace TP
 
         out << "Keychain\n    name: " << result.name << "\n    brief: " << result.brief << "\n    account name: " << result.account_name << std::endl;
         out << "The keychain will be deleted forever.\nTo force detele, please enter the master password.\nEnter anything else to abort.\nMASTER PASSWORD: ";
-        if (!checkMasterPassword(in, out, master_password))
+        std::string n_mp;
+        if (!checkMasterPassword(in, out, n_mp))
         {
             out << "Aborted." << std::endl;
+            TP::clean(std::move(n_mp));
             return;
         }
+        TP::clean(std::move(n_mp));
 
         data->erase(name);
         data->flush();
@@ -115,6 +121,7 @@ namespace TP
         std::string master_password;
         if (!login(in, out, master_password)) 
             return;
+        TP::clean(std::move(master_password));
 
         for (size_t i = 0; i < data->size(); i++)
         {

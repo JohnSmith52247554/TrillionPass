@@ -47,6 +47,8 @@ namespace TP
      * @return std::string the plaintext
      */
     std::string decrypt(EncryptedStr &encrypted_str, const std::string master_password);
+
+    volatile void clean(std::string &&str);
 } // namespace TP
 
 namespace

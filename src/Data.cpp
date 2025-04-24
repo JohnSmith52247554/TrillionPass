@@ -163,19 +163,24 @@ namespace TP
             std::ifstream file(file_path);
             if (!file.is_open())
                 throw std::runtime_error("cannot open keychain data file " + filepath);
-            
-            while (true)
+            file.seekg(0, std::ios::end);
+            auto file_size = file.tellg();
+            file.seekg(0, std::ios::beg);
+            auto cur = file.tellg();
+
+            while (cur < file_size)
             {
                 KeyChain key;
                 deserializeStr(file, key.name);
+                if (file.eof())
+                    break;
                 deserializeStr(file, key.brief);
                 deserializeStr(file, key.account_name);
                 deserializeStr(file, key.encrypted_password.ciphertext);
                 deserializeStr(file, key.encrypted_password.nonce);
                 deserializeStr(file, key.encrypted_password.salt);
-                if (file.eof())
-                    break;
                 data.push_back(key);
+                cur = file.tellg();
             }
             file.close();
         }

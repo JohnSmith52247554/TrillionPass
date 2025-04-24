@@ -100,13 +100,15 @@ namespace TP
                 out << "The input is different." << std::endl;
                 continue;
             }
+            TP::clean(std::move(repeated_mp));
 
             break;
         }
 
         out << "Saving the new master password." << std::endl;
         TEMP::setMasterPassword(new_mp);
-
+        TP::clean(std::move(new_mp));
+        TP::clean(std::move(original_mp));
         out << "Rencrypting password database." << std::endl;
         TP::Data::JsonPData data(std::string(PROJECT_PATH) + "/data/KeyChain.json");
         for (size_t i = 0u; i < data.size(); i++)
@@ -163,9 +165,10 @@ namespace TP
             if (repeated_mp != mp)
             {
                 out << "The input is different." << std::endl;
+                TP::clean(std::move(repeated_mp));
                 continue;
             }
-
+            TP::clean(std::move(repeated_mp));
             break;
         }
 
@@ -175,6 +178,7 @@ namespace TP
             throw std::runtime_error("failed to create config file");
         file.close();
         TEMP::setMasterPassword(mp);
+        TP::clean(std::move(mp));
     }
 }
 

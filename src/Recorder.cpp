@@ -153,10 +153,20 @@ namespace TP
         out << "Password has been copied to the clipboard." << std::endl;
 
         auto encrypted = TP::encrypt(raw_password, master_password);
+        TP::clean(std::move(raw_password));
         key.encrypted_password = encrypted;
-
+        TP::clean(std::move(master_password));
         data->add(key);
         data->flush();
         out << "Keychain has been saved." << std::endl;
+    }
+
+    void checkAndCreatDataBase()
+    {
+        if (!std::filesystem::exists(std::string(PROJECT_PATH) + "/data/KeyChain.bin"))
+        {
+            std::ofstream file(std::string(PROJECT_PATH) + "/data/KeyChain.bin");
+            file.close();
+        }
     }
 }

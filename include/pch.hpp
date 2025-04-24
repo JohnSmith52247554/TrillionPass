@@ -24,6 +24,7 @@
 #include <iterator>
 #include <sstream>
 #include <iomanip>
+#include <cstring>
 
 #ifdef _WIN32
 #include <windows.h>

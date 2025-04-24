@@ -16,8 +16,6 @@ if (MSVC)
     add_compile_options("/utf-8")
 endif()
 
-set(CMAKE_BUILD_TYPE Debug)
-
 add_executable(${PROJECT_NAME} ${SRC})
 target_precompile_headers(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include/pch.hpp)
 
@@ -42,4 +40,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBSODIUM_LIBRARIES})
 
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE bcrypt)
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 endif()

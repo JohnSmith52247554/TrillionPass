@@ -29,5 +29,7 @@ namespace TP
      * @param out output stream
      */
     void interactiveCreate(std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData>&& data);
+
+    void checkAndCreatDataBase();
 } // namespace TP
  

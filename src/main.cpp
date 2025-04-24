@@ -43,10 +43,11 @@ int main(int argc, char* argv[])
     //TEMP::setMasterPassword("password");
     //test(argc, &argv);
 
-    // parse command
     if (!TP::existsMasterPassword())
         TP::initMasterPassword(std::cin, std::cout);
+    TP::checkAndCreatDataBase();
 
+    // parse command
     CLParameters parameters;
     for (int i = 1; i < argc; i++)
     {
@@ -68,7 +69,7 @@ int main(int argc, char* argv[])
             if (parameters.argument.size() > 0 && parameters.argument[0] == "-i") // interactive create
             {
                 std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::BinaryPData>(std::string(PROJECT_PATH) + BINARY_DATA_PATH);
-
+                
                 TP::interactiveCreate(std::cin, std::cout, std::move(data));
             }
         }
@@ -83,7 +84,7 @@ int main(int argc, char* argv[])
         }
         else if (parameters.command == "-v")    // version
         {
-            std::cout << TPASS_VERSION << std::endl;
+            std::cout << "TrillionPass v" << TPASS_VERSION << std::endl;
         }
         else if (parameters.command == "-l")    // list all keychains
         {
@@ -111,6 +112,10 @@ int main(int argc, char* argv[])
         {
             std::cout << "Command not found." << std::endl;
         }
+    }
+    else
+    {
+        std::cout << "Command not found." << std::endl;
     }
 
     std::cin.get();
