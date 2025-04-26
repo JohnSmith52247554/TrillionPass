@@ -173,9 +173,9 @@ namespace TP
         }
 
         out << "Saving the master password." << std::endl;
-        std::ofstream file(USER_CONFIG_PATH);
+        std::ofstream file(USER_CONFIG_PATH, std::ios::binary);
         if (!file.is_open())
-            throw std::runtime_error("failed to create config file");
+            throw std::runtime_error("failed to create config file: " + USER_CONFIG_PATH);
         file.close();
         TEMP::setMasterPassword(mp);
         TP::clean(std::move(mp));
@@ -187,7 +187,7 @@ namespace TEMP
     void setMasterPassword(std::string password)
     {
         auto master_password = TP::hash(password);
-        std::ofstream o_file(USER_CONFIG_PATH);
+        std::ofstream o_file(USER_CONFIG_PATH, std::ios::binary);
         TP::Data::serializeStr(o_file, master_password);
         o_file.close();
     }

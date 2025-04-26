@@ -100,6 +100,7 @@ namespace TP
                     {
                         out << "Aborted." << std::endl;
                     }
+                    TP::clean(std::move(str));
                 }
 
                 out << "Please set another name." << std::endl;
@@ -125,9 +126,9 @@ namespace TP
             break;
         }
 
-        uint8_t length = 20;
+        uint8_t length = 16;
         std::string input;
-        out << "Length of the password to be generated [\033[4m20\033[0m]: ";
+        out << "Length of the password to be generated [\033[4m16\033[0m]: ";
         std::getline(in, input);
         if (input != "")
             length = std::stoi(input);
@@ -147,7 +148,96 @@ namespace TP
             special = false;
 
         std::string raw_password = TP::generate(length, upper, numbers, special);
-        assert(raw_password.size() == length);
+        out << "Creating keychain success." << std::endl;
+        copyToClipboard(raw_password);
+        out << "Password has been copied to the clipboard." << std::endl;
+
+        auto encrypted = TP::encrypt(raw_password, master_password);
+        TP::clean(std::move(raw_password));
+        key.encrypted_password = encrypted;
+        TP::clean(std::move(master_password));
+        data->add(key);
+        data->flush();
+        out << "Keychain has been saved." << std::endl;
+    }
+
+    void quickCreate(std::istream &in, std::ostream &out, TP::KeyChain &key, std::unique_ptr<TP::Data::PasswordData> &&data)
+    {
+        out << "Create Keychain\n============================" << std::endl;
+
+        std::string master_password;
+        if (!login(in, out, master_password))
+            return;
+
+        auto rename = [&]() { out << "name: ";
+            std::getline(in, key.name);
+        };
+        while (true)
+        {
+            if (key.name == "")
+            {
+                out << "The name should not be empty, please try again." << std::endl;
+                rename;
+            }
+            else if (key.name.find(' ') != std::string::npos)
+            {
+                out << "The name should not contain space, please try again." << std::endl;
+                rename;
+            }
+            else
+            {
+                auto found = data->find(key.name);
+                if (found.name != "")
+                {
+                    out << "The name you have enter already exist." << std::endl;
+                    out << "   name: " << found.name << "\n   brief: " << found.brief << "\nWould you like to overwrite it? [y/\033[4mn\033[0m]: ";
+                    std::string input;
+                    std::getline(in, input);
+                    if (input == "y" || input == "Y" || input == "yes" || input == "Yes" || input == "YES")
+                    {
+                        out << "The original keychain will be deleted FOREVER.\nTo force overwrite, please enter the master password.\nEnter any thing other to abort." << std::endl;
+                        out << "MASTER PASSWORD: ";
+                        std::string str;
+                        if (checkMasterPassword(in, out, str))
+                        {
+                            out << "Keychain \"" << key.name << "\" will be overwritten." << std::endl;
+                            data->erase(key.name);
+                            break;
+                        }
+                        else
+                        {
+                            out << "Aborted." << std::endl;
+                        }
+
+                        TP::clean(std::move(str));
+                    }
+
+                    out << "Please set another name." << std::endl;
+                    rename;
+                }
+            }
+            break;
+        }
+
+        if (key.brief == "")
+        {
+            out << "brief: ";
+            std::getline(in, key.brief);
+        }
+
+        if (key.account_name == "")
+        {
+            while (true)
+            {
+                out << "account: ";
+                std::getline(in, key.account_name);
+                if (key.account_name != "")
+                    break;
+                out << "Account should not be empty" << std::endl;
+            }
+        }
+
+        std::string raw_password = TP::generate(16, true, true, true);
         out << "Creating keychain success." << std::endl;
         copyToClipboard(raw_password);
         out << "Password has been copied to the clipboard." << std::endl;

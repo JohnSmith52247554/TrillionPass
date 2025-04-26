@@ -15,98 +15,119 @@
 #include <MasterPassword.hpp>
 
 // TODO: choose the filepath according to username
-const std::string DATA_PATH = "/data/KeyChain.json";
 const std::string BINARY_DATA_PATH = "/data/KeyChain.bin";
 
 // structure to store command line parameters
 struct CLParameters
 {
-    std::string command;    // should begin with '-']
+    std::string command;    // should begin with '-'
     std::vector<std::string> argument;
 };
 
-void test(int& argc, char** argv[])
-{
-    argc = 3;
-    *argv = new char* [argc];
-    for (int i = 0; i < argc; i++)
-    {
-        (*argv)[i] = new char[10];
-    }
-    (*argv)[0] = "pass";
-    (*argv)[1] = "-c";
-    (*argv)[2] = "-i";
-}
 
 int main(int argc, char* argv[])
 {
-    //TEMP::setMasterPassword("password");
-    //test(argc, &argv);
-
+try{
     if (!TP::existsMasterPassword())
         TP::initMasterPassword(std::cin, std::cout);
     TP::checkAndCreatDataBase();
 
     // parse command
     CLParameters parameters;
+    std::vector<CLParameters> commands;
     for (int i = 1; i < argc; i++)
     {
-        if (i == 1 && argv[i][0] == '-')
+        if (argv[i][0] == '-')
         {
+            if (parameters.command != "")
+                commands.push_back(parameters);
             parameters.command = argv[i];
+            parameters.argument.clear();
         }
         else
         {
             parameters.argument.push_back(argv[i]);
         }
     }
-
     if (parameters.command != "")
+        commands.push_back(parameters);
+
+    if (commands.size() > 0)
     {
         // create new keychain
-        if (parameters.command == "-c")
+        if (commands[0].command == "-c")
         {
-            if (parameters.argument.size() > 0 && parameters.argument[0] == "-i") // interactive create
+            if (commands.size() > 1) // create
             {
                 std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::BinaryPData>(std::string(PROJECT_PATH) + BINARY_DATA_PATH);
-                
-                TP::interactiveCreate(std::cin, std::cout, std::move(data));
+
+                if (commands[1].command == "-i") // interactive
+                    TP::interactiveCreate(std::cin, std::cout, std::move(data));
+                else
+                {
+                    TP::KeyChain key;
+                    for (size_t i = 1u; i < commands.size(); i++)
+                    {
+                        const auto &command = commands[i];
+                        if (command.command == "-name")
+                        {
+                            if (command.argument.size() > 0)
+                                key.name = command.argument[0];
+                        }
+                        else if (command.command == "-brief")
+                        {   
+                            for (const auto& str : command.argument)
+                            {
+                                key.brief += str + ' ';
+                            }
+                        }
+                        else if (command.command == "-account")
+                        {
+                            for (const auto &str : command.argument)
+                            {
+                                key.account_name += str + ' ';
+                            }
+                        }
+                    }
+
+                    TP::quickCreate(std::cin, std::cout, key, std::move(data));
+                }
             }
         }
-        else if (parameters.command == "-f")    // find
+        else if (commands[0].command == "-f") // find
         {
-            if (parameters.argument.size() == 0)
-                parameters.argument.push_back("");
+            if (commands[0].argument.size() == 0)
+                commands[0].argument.push_back("");
 
             std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::BinaryPData>(std::string(PROJECT_PATH) + BINARY_DATA_PATH);
 
-            TP::find(parameters.argument[0], std::cin, std::cout, std::move(data));
+            TP::find(commands[0].argument[0], std::cin, std::cout, std::move(data));
         }
-        else if (parameters.command == "-v")    // version
+        else if (commands[0].command == "-v") // version
         {
             std::cout << "TrillionPass v" << TPASS_VERSION << std::endl;
         }
-        else if (parameters.command == "-l")    // list all keychains
+        else if (commands.size() > 1 && commands[1].command == "-l") // list all keychains
         {
             std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::BinaryPData>(std::string(PROJECT_PATH) + BINARY_DATA_PATH);
 
             TP::listAllKeyChains(std::cin, std::cout, std::move(data));
         }
-        else if (parameters.command == "-mp")   // master password
+        else if (commands[0].command == "-mp") // master password
         {
-            if (parameters.argument.size() > 0 && parameters.argument[0] == "-c")   // change
+            if (commands.size() > 1 && commands[1].command == "-c") // change
             {
                 TP::changeMasterPassword(std::cin, std::cout);
             }
         }
-        else if (parameters.command == "-d")    // delete
+        else if (commands[0].command == "-d") // delete
         {
-            if (parameters.argument.size() == 0)
-                parameters.argument.push_back("");
+            if (commands[0].argument.size() == 0)
+                commands[0].argument.push_back("");
 
             std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::BinaryPData>(std::string(PROJECT_PATH) + BINARY_DATA_PATH);
 
-            TP::deleteKeyChain(parameters.argument[0], std::cin, std::cout, std::move(data));
+            TP::deleteKeyChain(commands[0].argument[0], std::cin, std::cout, std::move(data));
         }
         else
         {
@@ -115,10 +136,13 @@ int main(int argc, char* argv[])
     }
     else
     {
-        std::cout << "Command not found." << std::endl;
+        std::cout << "Trillion Pass" << std::endl;
     }
-
-    std::cin.get();
+}
+catch(std::exception& e)
+{
+    std::cerr << e.what() << std::endl;
+}
     
     return 0;
 }

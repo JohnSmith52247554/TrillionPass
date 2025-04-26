@@ -30,6 +30,20 @@ namespace TP
      */
     void interactiveCreate(std::istream &in, std::ostream &out, std::unique_ptr<TP::Data::PasswordData>&& data);
 
+    /**
+     * @brief create a keychain using command lines parameters
+     * 
+     * @param in input stream
+     * @param out output stream
+     * @param para the parameters of the keychain
+     * @param data password data base
+     */
+    void quickCreate(std::istream &in, std::ostream &out, TP::KeyChain &para, std::unique_ptr<TP::Data::PasswordData> &&data);
+
+    /**
+     * @brief Check if the password database exists. If not, then create a blank file.
+     * 
+     */
     void checkAndCreatDataBase();
 } // namespace TP
  

@@ -28,7 +28,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/debug)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE 
-PROJECT_PATH="${CMAKE_SOURCE_DIR}"
 TPASS_VERSION="${PROJECT_VERSION}"
 )
 
@@ -44,4 +43,11 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE 
+    PROJECT_PATH="."
+    )
+elseif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE 
+    PROJECT_PATH="${CMAKE_SOURCE_DIR}"
+    )
 endif()
