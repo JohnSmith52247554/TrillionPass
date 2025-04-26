@@ -107,7 +107,7 @@ try{
         {
             std::cout << "TrillionPass v" << TPASS_VERSION << std::endl;
         }
-        else if (commands.size() > 1 && commands[1].command == "-l") // list all keychains
+        else if (commands[0].command == "-l") // list all keychains
         {
             std::unique_ptr<TP::Data::PasswordData> data = std::make_unique<TP::Data::BinaryPData>(std::string(PROJECT_PATH) + BINARY_DATA_PATH);
 

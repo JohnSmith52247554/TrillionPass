@@ -44,7 +44,7 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
     target_compile_definitions(${PROJECT_NAME} PRIVATE 
-    PROJECT_PATH="."
+    PROJECT_PATH="C:/TPass"
     )
 elseif (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT_NAME} PRIVATE 
